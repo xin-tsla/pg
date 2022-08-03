@@ -3,6 +3,7 @@ package pg
 import (
 	"context"
 	"io"
+	"log"
 	"time"
 
 	"github.com/go-pg/pg/v10/internal"
@@ -145,6 +146,7 @@ func (db *baseDB) withConn(
 			select {
 			case <-fnDone: // fn has finished, skip cancel
 			case <-ctx.Done():
+				log.Println("line 149", cn.ProcessID, cn.SecretKey)
 				err := db.cancelRequest(cn.ProcessID, cn.SecretKey)
 				if err != nil {
 					internal.Logger.Printf(ctx, "cancelRequest failed: %s", err)
@@ -241,7 +243,7 @@ func (db *baseDB) exec(ctx context.Context, query interface{}, params ...interfa
 				return nil, err
 			}
 		}
-
+		log.Println("line 245", db.opt.MaxRetries)
 		lastErr = db.withConn(ctx, func(ctx context.Context, cn *pool.Conn) error {
 			res, err = db.simpleQuery(ctx, cn, wb)
 			return err
